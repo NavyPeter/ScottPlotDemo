@@ -23,7 +23,28 @@ namespace WpfAppTestDemo
         public MainWindow()
         {
             InitializeComponent();
-            Loaded += MainWindow_Loaded; // 窗口加载完成后初始化图表
+            BuildMultiplot();
+            //Loaded += MainWindow_Loaded; // 窗口加载完成后初始化图表
+        }
+
+        private void BuildMultiplot()
+        {
+            var multiplot = new Multiplot();
+            // 添加两个子图
+            multiplot.AddPlots(4);
+            // 获取第一个子图并添加正弦波数据
+            var plot1 = multiplot.GetPlot(0);
+            plot1.Add.Signal(Generate.Sin(1000, 1, 1));
+            plot1.Axes.SetLimitsY(0, 1);
+            // 获取第二个子图并添加余弦波数据
+            var plot2 = multiplot.GetPlot(1);
+            plot2.Add.Signal(Generate.Cos(1000, 1, 1));
+            // 将 Multiplot 绑定到 WpfPlot 控件
+            WpfPlot1.Multiplot = multiplot;
+            plot2.Axes.SetLimitsY(0, 1);
+
+            // 刷新显示
+            WpfPlot1.Refresh();
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -46,15 +67,15 @@ namespace WpfAppTestDemo
             var dtGen = (ScottPlot.TickGenerators.DateTimeAutomatic)bottomAxis.TickGenerator;
             dtGen.LabelFormatter = dt => dt.ToString("HH:mm:ss");
             //整个控件背景颜色
-            //WpfPlot1.Plot.FigureBackground.Color = Colors.LightGoldenRodYellow;
+            WpfPlot1.Plot.FigureBackground.Color = Colors.LightGoldenRodYellow;
             //绘图区域的颜色
-            WpfPlot1.Plot.DataBackground.Color = Colors.Black;
+            //WpfPlot1.Plot.DataBackground.Color = Colors.Black;
             //网格线颜色
-            //WpfPlot1.Plot.Grid.LineColor = Colors.White.WithAlpha(.6);
+            WpfPlot1.Plot.Grid.LineColor = Colors.White.WithAlpha(.6);
 
-            //WpfPlot1.Plot.Grid.XAxisStyle.MajorLineStyle.Color = Colors.Magenta;
+            WpfPlot1.Plot.Grid.XAxisStyle.MajorLineStyle.Color = Colors.Magenta;
 
-            //WpfPlot1.Plot.Grid.YAxisStyle.MajorLineStyle.Color = Colors.Pink;
+            WpfPlot1.Plot.Grid.YAxisStyle.MajorLineStyle.Color = Colors.Pink;
             //网格类型 实线-虚线
             WpfPlot1.Plot.Grid.LinePattern = LinePattern.Solid;
             //抗锯齿
@@ -94,7 +115,7 @@ namespace WpfAppTestDemo
             line3.LineWidth = 2;
             line3.LinePattern = ScottPlot.LinePattern.Solid;
             line3.MarkerShape = MarkerShape.None;
-            // 设置初始状态：显示图例和网格
+            //设置初始状态：显示图例和网格
             WpfPlot1.Plot.HideGrid();
 
             //// 自动调整坐标轴范围以适应所有数据
