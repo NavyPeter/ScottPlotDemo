@@ -23,25 +23,37 @@ namespace WpfAppTestDemo
         public MainWindow()
         {
             InitializeComponent();
-            BuildMultiplot();
-            //Loaded += MainWindow_Loaded; // 窗口加载完成后初始化图表
+            //BuildMultiplot();
+            Loaded += MainWindow_Loaded; // 窗口加载完成后初始化图表
         }
 
         private void BuildMultiplot()
         {
             var multiplot = new Multiplot();
-            // 添加两个子图
-            multiplot.AddPlots(4);
-            // 获取第一个子图并添加正弦波数据
+            multiplot.AddPlots(2);
+
+            // 获取第一个子图并添加随机曲线数据
             var plot1 = multiplot.GetPlot(0);
-            plot1.Add.Signal(Generate.Sin(1000, 1, 1));
-            plot1.Axes.SetLimitsY(0, 1);
-            // 获取第二个子图并添加余弦波数据
+            // 增加数据点数量，进一步增大步长标准差
+            plot1.Add.Signal(Generate.RandomWalk(50, 1, 5));
+            plot1.Axes.SetLimitsY(-20, 20); // 调整 Y 轴范围以适应更大波动
+            plot1.Axes.SetLimitsX(0, 50); // 设置 X 轴范围
+
+            // 获取第二个子图并添加方波数据
             var plot2 = multiplot.GetPlot(1);
-            plot2.Add.Signal(Generate.Cos(1000, 1, 1));
+            // 生成标准方波数据
+            int pointCount = 1000;
+            double[] squareWave = new double[pointCount];
+            int period = 100; // 方波周期
+            for (int i = 0; i < pointCount; i++)
+            {
+                squareWave[i] = (i % period < period / 2) ? 1 : 0;
+            }
+            plot2.Add.Signal(squareWave);
+            plot2.Axes.SetLimitsY(0, 5);
+
             // 将 Multiplot 绑定到 WpfPlot 控件
             WpfPlot1.Multiplot = multiplot;
-            plot2.Axes.SetLimitsY(0, 1);
 
             // 刷新显示
             WpfPlot1.Refresh();
@@ -75,7 +87,13 @@ namespace WpfAppTestDemo
 
             WpfPlot1.Plot.Grid.XAxisStyle.MajorLineStyle.Color = Colors.Magenta;
 
-            WpfPlot1.Plot.Grid.YAxisStyle.MajorLineStyle.Color = Colors.Pink;
+            //WpfPlot1.Plot.Grid.YAxisStyle.MajorLineStyle.Color = Colors.Pink;
+            //隐藏Y轴的刻度
+            WpfPlot1.Plot.Axes.Left.TickLabelStyle.IsVisible = false;
+            WpfPlot1.Plot.Axes.Left.MajorTickStyle.Length = 0;
+            // Y轴的边框线
+            WpfPlot1.Plot.Axes.Left.FrameLineStyle.Width = 0;
+
             //网格类型 实线-虚线
             WpfPlot1.Plot.Grid.LinePattern = LinePattern.Solid;
             //抗锯齿
@@ -87,12 +105,32 @@ namespace WpfAppTestDemo
             int pointCount = 50;
             double[] x = Generate.Range(pointCount, 100); // X轴数据：0, 0.1, 0.2, ..., 4.9
 
+            double[] squareWave = new double[pointCount];
+            int period = 100; // 方波周期
+            for (int i = 0; i < pointCount; i++)
+            {
+                squareWave[i] = (i % period < period / 2) ? 1 : 0;
+            }
+
+            double[] xxxy = new double[pointCount];
+            for (int i = 0; i < pointCount; i++)
+            {
+                xxxy[i] = (i % period < period / 2) ? 1 : 2;
+            }
+
+            double[] doubles3 = new double[pointCount];
+            for (int i = 0; i < pointCount; i++)
+            {
+                doubles3[i] = (i % period < period / 2) ? 2 : 3;
+            }
+
             // 第一条线：正弦曲线
-            double[] y1 = Generate.Sin(pointCount, 1, 0.5);
-            var line1 = WpfPlot1.Plot.Add.Scatter(x, y1);
+            //double[] y1 = Generate.Sin(pointCount, 1, 0.5);
+            //var line1 = WpfPlot1.Plot.Add.Scatter(x, squareWave);
+            var line1 = WpfPlot1.Plot.Add.Signal(squareWave);
+
             line1.LegendText = "Sin";
             line1.Color = Colors.Blue;
-            line1.FillYColor = Colors.Purple;
             line1.LineWidth = 2;
             line1.LinePattern = ScottPlot.LinePattern.Solid;
             line1.MarkerShape = MarkerShape.None;
@@ -101,7 +139,8 @@ namespace WpfAppTestDemo
 
             // 第二条线：余弦曲线
             double[] y2 = Generate.Cos(pointCount, 1, 0.5);
-            var line2 = WpfPlot1.Plot.Add.Scatter(x, y2);
+            //var line2 = WpfPlot1.Plot.Add.Scatter(x, squareWave);
+            var line2 = WpfPlot1.Plot.Add.Signal(xxxy);
             line2.LegendText = "cos";
             line2.Color = Colors.Red;
             line2.LineWidth = 2;
@@ -109,7 +148,8 @@ namespace WpfAppTestDemo
             line2.MarkerShape = MarkerShape.None;
             // 第三条线：随机数据
             double[] y3 = Generate.RandomWalk(pointCount, 0, 0.2);
-            var line3 = WpfPlot1.Plot.Add.Scatter(x, y3);
+            //var line3 = WpfPlot1.Plot.Add.Scatter(x, squareWave);
+            var line3 = WpfPlot1.Plot.Add.Signal(doubles3);
             line3.LegendText = "A";
             line3.Color = Colors.Green;
             line3.LineWidth = 2;
@@ -119,7 +159,7 @@ namespace WpfAppTestDemo
             WpfPlot1.Plot.HideGrid();
 
             //// 自动调整坐标轴范围以适应所有数据
-            WpfPlot1.Plot.Axes.AutoScale();
+            //WpfPlot1.Plot.Axes.AutoScale();
 
             // 刷新图表显示
             WpfPlot1.Refresh();
